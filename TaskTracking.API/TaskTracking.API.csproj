@@ -19,10 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TaskTracking.Application\TaskTracking.Application.csproj" />
     <ProjectReference Include="..\TaskTracking.Domain\TaskTracking.Domain.csproj" />
     <ProjectReference Include="..\TaskTracking.Infrastructure\TaskTracking.Infrastructure.csproj" />

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using TaskTracking.Domain.Enums;
 
 namespace TaskTracking.Domain.Entities
 {
@@ -14,7 +11,7 @@ namespace TaskTracking.Domain.Entities
 
         public string Description { get; set; }
 
-        public TaskStatus Status { get; set; }
+        public Status Status { get; set; }
 
         public DateTime DueDate { get; set; }
 

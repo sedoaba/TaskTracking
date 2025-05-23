@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TaskTracking.Infrastructure;
+using TaskTracking.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+
+using(var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+    DbInitializer.Seed(dbContext);
+}
 
 app.UseHttpsRedirection();
 
