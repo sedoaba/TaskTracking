@@ -37,17 +37,27 @@ namespace TaskTracking.Infrastructure.Seeding
                     new TaskItem
                     {
                         Id = Guid.NewGuid(),
-                        Title = "Initial  Task",
-                        Description = "Task assigned to admin.",
+                        Title = "Initial Task",
+                        Description = "Task assigned to user.",
                         CreatedDate = DateTime.UtcNow,
                         DueDate = DateTime.UtcNow.AddDays(3),
                         Status = Status.New,
-                        AssignedUserId = admin.Id
+                        AssignedUserId = user.Id
                     },
                     new TaskItem
                     {
                         Id = Guid.NewGuid(),
-                        Title = "Overdue  Task",
+                        Title = "Overdue Task",
+                        Description = "Overdue task for user.",
+                        CreatedDate = DateTime.UtcNow.AddDays(-5),
+                        DueDate = DateTime.UtcNow.AddDays(-1),
+                        Status = Status.New,
+                        AssignedUserId = user.Id
+                    },
+                    new TaskItem
+                    {
+                        Id = Guid.NewGuid(),
+                        Title = "Overdue Task",
                         Description = "Overdue task for user.",
                         CreatedDate = DateTime.UtcNow.AddDays(-5),
                         DueDate = DateTime.UtcNow.AddDays(-2),

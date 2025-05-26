@@ -6,6 +6,10 @@ using TaskTracking.Application.Auth;
 using TaskTracking.Infrastructure;
 using TaskTracking.Infrastructure.Auth;
 using TaskTracking.Infrastructure.Seeding;
+using Hangfire;
+using Hangfire.SqlServer;
+using TaskTracking.Infrastructure.Services;
+using TaskTracking.Infrastructure.Scheduling;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,8 +41,32 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+builder.Services.AddSingleton(builder.Configuration.GetSection("Jobs"));
+
+builder.Services.AddHangfire(config =>
+        config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings()
+          .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+          {
+              CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+              SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+              QueuePollInterval = TimeSpan.FromSeconds(15),
+              UseRecommendedIsolationLevel = true,
+              DisableGlobalLocks = true
+          }));
+
+builder.Services.AddHangfireServer();
+
+
+// Register application services
+builder.Services.AddScoped<ITaskService, TaskService>();
+
+builder.Services.AddScoped<ITaskStatusScheduler, TaskStatusScheduler>();
+
+
 
 
 var app = builder.Build();
@@ -47,6 +75,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseHangfireDashboard("/hangfire");
 }
 
 
@@ -63,5 +92,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+var configuration = app.Services.GetRequiredService<IConfiguration>();
+var overdueCron = configuration["Jobs:OverdueTaskCron"] ?? "0 * * * *";
+
+// Start Hangfire recurring jobs
+RecurringJob.AddOrUpdate<ITaskStatusScheduler>(
+    "OverdueTask",
+    scheduler => scheduler.UpdateOverduTaskAsync(),
+    overdueCron);
 
 app.Run();
